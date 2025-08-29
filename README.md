@@ -81,7 +81,7 @@ You can now install the plugin in your Grafana instance.
 
 ## Pre-requisites (running in Grafana)
 
-- Grafana `9.0` or later
+- Grafana `10` or later
 - Databricks workspace (any cloud provider)
 - Databricks Service Principal with the following permissions:
   - Permissions to list either all or specific jobs / pipelines, **or**:

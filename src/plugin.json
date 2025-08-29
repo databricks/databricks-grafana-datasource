@@ -5,6 +5,7 @@
   "id": "databricks-grafana-datasource",
   "metrics": true,
   "backend": true,
+  "alerting": true,
   "executable": "gpx_databricks",
   "info": {
     "description": "Databricks Community plugin for monitoring and observability",
