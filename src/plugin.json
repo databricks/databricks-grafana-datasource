@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "datasource",
+  "name": "Databricks Community",
+  "id": "databricks-grafana-datasource",
+  "metrics": true,
+  "backend": true,
+  "executable": "gpx_databricks",
+  "info": {
+    "description": "Databricks Community plugin for monitoring and observability",
+    "author": {
+      "name": "Aleksandar Dragojevic"
+    },
+    "keywords": ["datasource", "Databricks"],
+    "logos": {
+      "small": "img/logo-sm.png",
+      "large": "img/logo-lg.png"
+    },
+    "links": [],
+    "screenshots": [
+      {
+        "name": "Databricks Jobs",
+        "path": "img/screenshot.jpg"
+      }
+    ],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=10.4.0",
+    "plugins": []
+  }
+}
