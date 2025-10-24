@@ -16,7 +16,9 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: databricks-deco-testing-runner-group
+      labels: ubuntu-latest-deco
     steps:
       - uses: grafana/plugin-actions/create-plugin-update@main
         # Uncomment to use a fine-grained personal access token instead of default github token
