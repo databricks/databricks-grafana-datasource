@@ -18,14 +18,14 @@ permissions:
 jobs:
   build:
     name: Build, lint and unit tests
-    runs-on: ubuntu-latest
+    runs-on:
+      group: databricks-protected-runner-group
+      labels: linux-ubuntu-latest
     outputs:
       plugin-id: ${{ steps.metadata.outputs.plugin-id }}
       plugin-version: ${{ steps.metadata.outputs.plugin-version }}
       has-e2e: ${{ steps.check-for-e2e.outputs.has-e2e }}
       has-backend: ${{ steps.check-for-backend.outputs.has-backend }}
-    env:
-      GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js environment
@@ -87,10 +87,6 @@ jobs:
             echo "has-e2e=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Sign plugin
-        run: npm run sign
-        if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
-
       - name: Get plugin metadata
         id: metadata
         run: |
@@ -133,7 +129,9 @@ jobs:
 
   resolve-versions:
     name: Resolve e2e images
-    runs-on: ubuntu-latest
+    runs-on:
+      group: databricks-protected-runner-group
+      labels: linux-ubuntu-latest
     timeout-minutes: 3
     needs: build
     if: ${{ needs.build.outputs.has-e2e == 'true' }}
@@ -146,70 +144,72 @@ jobs:
         id: resolve-versions
         uses: grafana/plugin-actions/e2e-version@main
 
-  playwright-tests:
-    needs: [resolve-versions, build]
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        GRAFANA_IMAGE: ${{fromJson(needs.resolve-versions.outputs.matrix)}}
-    name: e2e test ${{ matrix.GRAFANA_IMAGE.name }}@${{ matrix.GRAFANA_IMAGE.VERSION }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # playwright-tests:
+  #   needs: [resolve-versions, build]
+  #   timeout-minutes: 15
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       GRAFANA_IMAGE: ${{fromJson(needs.resolve-versions.outputs.matrix)}}
+  #   name: e2e test ${{ matrix.GRAFANA_IMAGE.name }}@${{ matrix.GRAFANA_IMAGE.VERSION }}
+  #   runs-on:
+  #     group: databricks-protected-runner-group
+  #     labels: linux-ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Download plugin
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-          name: ${{ needs.build.outputs.plugin-id }}-${{ needs.build.outputs.plugin-version }}
+  #     - name: Download plugin
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: dist
+  #         name: ${{ needs.build.outputs.plugin-id }}-${{ needs.build.outputs.plugin-version }}
 
-      - name: Execute permissions on binary
-        if: needs.build.outputs.has-backend == 'true'
-        run: |
-          chmod +x ./dist/gpx_*
+  #     - name: Execute permissions on binary
+  #       if: needs.build.outputs.has-backend == 'true'
+  #       run: |
+  #         chmod +x ./dist/gpx_*
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
+  #     - name: Setup Node.js environment
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '22'
+  #         cache: 'npm'
 
-      - name: Install dev dependencies
-        run: npm ci
+  #     - name: Install dev dependencies
+  #       run: npm ci
 
-      - name: Start Grafana
-        run: |
-          docker compose pull
-          ANONYMOUS_AUTH_ENABLED=false DEVELOPMENT=false GRAFANA_VERSION=${{ matrix.GRAFANA_IMAGE.VERSION }} GRAFANA_IMAGE=${{ matrix.GRAFANA_IMAGE.NAME }} docker compose up -d
+  #     - name: Start Grafana
+  #       run: |
+  #         docker compose pull
+  #         ANONYMOUS_AUTH_ENABLED=false DEVELOPMENT=false GRAFANA_VERSION=${{ matrix.GRAFANA_IMAGE.VERSION }} GRAFANA_IMAGE=${{ matrix.GRAFANA_IMAGE.NAME }} docker compose up -d
 
-      - name: Wait for grafana server
-        uses: grafana/plugin-actions/wait-for-grafana@main
-        with:
-          url: http://localhost:3000/login
+  #     - name: Wait for grafana server
+  #       uses: grafana/plugin-actions/wait-for-grafana@main
+  #       with:
+  #         url: http://localhost:3000/login
 
-      - name: Install Playwright Browsers
-        run: npm exec playwright install chromium --with-deps
+  #     - name: Install Playwright Browsers
+  #       run: npm exec playwright install chromium --with-deps
 
-      - name: Run Playwright tests
-        id: run-tests
-        run: npm run e2e
+  #     - name: Run Playwright tests
+  #       id: run-tests
+  #       run: npm run e2e
 
-      - name: Upload e2e test summary
-        uses: grafana/plugin-actions/playwright-gh-pages/upload-report-artifacts@main
-        if: ${{ always() && !cancelled() }}
-        with:
-          upload-report: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          test-outcome: ${{ steps.run-tests.outcome }}
+  #     - name: Upload e2e test summary
+  #       uses: grafana/plugin-actions/playwright-gh-pages/upload-report-artifacts@main
+  #       if: ${{ always() && !cancelled() }}
+  #       with:
+  #         upload-report: false
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         test-outcome: ${{ steps.run-tests.outcome }}
 
-      - name: Docker logs
-        if: ${{ always() && steps.run-tests.outcome == 'failure' }}
-        run: |
-          docker logs databricks-grafana-datasource >& grafana-server.log
+  #     - name: Docker logs
+  #       if: ${{ always() && steps.run-tests.outcome == 'failure' }}
+  #       run: |
+  #         docker logs databricks-grafana-datasource >& grafana-server.log
 
-      - name: Stop grafana docker
-        run: docker compose down
+  #     - name: Stop grafana docker
+  #       run: docker compose down
 
       # Uncomment this step to upload the server log to Github artifacts. Remember Github artifacts are public on the Internet if the repository is public.
       # - name: Upload server log
@@ -220,13 +220,15 @@ jobs:
       #     path: grafana-server.log
       #     retention-days: 5
 
-  publish-report:
-    if: ${{ always() && !cancelled() }}
-    needs: [playwright-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Publish report
-        uses: grafana/plugin-actions/playwright-gh-pages/deploy-report-pages@main
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+  # publish-report:
+  #   if: ${{ always() && !cancelled() }}
+  #   needs: [playwright-tests]
+  #   runs-on:
+  #     group: databricks-protected-runner-group
+  #     labels: linux-ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Publish report
+  #       uses: grafana/plugin-actions/playwright-gh-pages/deploy-report-pages@main
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}

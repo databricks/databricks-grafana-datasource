@@ -16,7 +16,9 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: databricks-protected-runner-group
+      labels: linux-ubuntu-latest
     steps:
       - uses: grafana/plugin-actions/create-plugin-update@main
         # Uncomment to use a fine-grained personal access token instead of default github token
