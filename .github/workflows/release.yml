@@ -14,8 +14,8 @@ jobs:
     permissions:
       contents: write
     runs-on:
-      group: databricks-field-eng-protected-runner-group
-      labels: ubuntu-latest
+      group: databricks-protected-runner-group
+      labels: linux-ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: grafana/plugin-actions/build-plugin@main

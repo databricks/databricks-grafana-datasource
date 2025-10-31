@@ -4,8 +4,8 @@ on: [pull_request]
 jobs:
   compatibilitycheck:
     runs-on:
-      group: databricks-field-eng-protected-runner-group
-      labels: ubuntu-latest
+      group: databricks-protected-runner-group
+      labels: linux-ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js environment
