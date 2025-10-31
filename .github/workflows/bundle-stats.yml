@@ -13,8 +13,8 @@ permissions:
 jobs:
   compare:
     runs-on:
-      group: databricks-deco-testing-runner-group
-      labels: ubuntu-latest-deco
+      group: databricks-field-eng-protected-runner-group
+      labels: ubuntu-latest
 
     steps:
       - name: Checkout repository

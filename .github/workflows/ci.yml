@@ -19,8 +19,8 @@ jobs:
   build:
     name: Build, lint and unit tests
     runs-on:
-      group: databricks-deco-testing-runner-group
-      labels: ubuntu-latest-deco
+      group: databricks-field-eng-protected-runner-group
+      labels: ubuntu-latest
     outputs:
       plugin-id: ${{ steps.metadata.outputs.plugin-id }}
       plugin-version: ${{ steps.metadata.outputs.plugin-version }}
@@ -136,8 +136,8 @@ jobs:
   resolve-versions:
     name: Resolve e2e images
     runs-on:
-      group: databricks-deco-testing-runner-group
-      labels: ubuntu-latest-deco
+      group: databricks-field-eng-protected-runner-group
+      labels: ubuntu-latest
     timeout-minutes: 3
     needs: build
     if: ${{ needs.build.outputs.has-e2e == 'true' }}
@@ -159,8 +159,8 @@ jobs:
         GRAFANA_IMAGE: ${{fromJson(needs.resolve-versions.outputs.matrix)}}
     name: e2e test ${{ matrix.GRAFANA_IMAGE.name }}@${{ matrix.GRAFANA_IMAGE.VERSION }}
     runs-on:
-      group: databricks-deco-testing-runner-group
-      labels: ubuntu-latest-deco
+      group: databricks-field-eng-protected-runner-group
+      labels: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -230,8 +230,8 @@ jobs:
     if: ${{ always() && !cancelled() }}
     needs: [playwright-tests]
     runs-on:
-      group: databricks-deco-testing-runner-group
-      labels: ubuntu-latest-deco
+      group: databricks-field-eng-protected-runner-group
+      labels: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Publish report
