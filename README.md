@@ -10,14 +10,69 @@ A Grafana plugin for monitoring and visualizing Databricks Jobs, DLTs and Pipeli
 - Pipelines: Query data about your Databricks Delta Live Tables pipelines
 - Filtering Options: Flexible filtering by job ID, run type, and execution status
 
+Please see the [CHANGELOG](./CHANGELOG.md) for the latest updates and changes.
+
 ## Installation
 
-### Pre-requisites (building from source)
+Depending on your configuration you can either download the pre-packaged zip file or the source code and build it yourself (see instructions below).
+
+### Using the Release version
+
+Easiest way to use the plugin is to use the [latest release](https://github.com/databricks/databricks-grafana-datasource/releases/latest).
+
+If your Grafana instance is configured to only allow signed plugins to run, you will need to sign the plugin yourself (see instructions below).
+
+#### Signing the release plugin
+
+1. Download the latest release zip file from the [releases page](https://github.com/databricks/databricks-grafana-datasource/releases/latest).
+2. Unzip the file into `dist` directory:
+
+   ```bash
+   unzip databricks-grafana-datasource-x.y.z.zip -d dist
+   ```
+
+3. Create Access Policy Token in your Grafana Cloud instance (Security > Access Policies). This token will be used to sign the plugin.
+
+4. Export the token to your environment:
+
+   ```bash
+   export GRAFANA_ACCESS_POLICY_TOKEN=glc...
+   ```
+
+5. Sign the plugin, replacing the root URL with your Grafana instance URL:
+
+   ```bash
+   npx @grafana/sign-plugin@latest --rootUrls http://localhost:3000/
+   ```
+
+6. Re-package the plugin into a zip file (if needed):
+
+   ```bash
+   mv dist databricks-grafana-datasource
+   zip -r databricks-grafana-datasource.zip databricks-grafana-datasource
+   ```
+
+You can now install the signed plugin in your Grafana instance. To quickly validate the plugin, you can spin up a local Grafana instance using Docker (where `$PWD/plugins` is the directory containing the signed plugin `databricks-grafana-datasource`):
+
+```bash
+docker run --rm -p 3000:3000 \
+  -v "$PWD/plugins:/var/lib/grafana/plugins" \
+  -e GF_AUTH_DISABLE_LOGIN_FORM=true \
+  -e GF_AUTH_ANONYMOUS_ENABLED=true \
+  -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin \
+  grafana/grafana:latest
+```
+
+If everything is set up correctly, you should be able to see the "Databricks Community" plugin in the Grafana UI under `Configuration > Data Sources > Add data source` and `msg="Plugin registered" pluginId=databricks-grafana-datasource` message in the Grafana server logs.
+
+### Building from Source
+
+#### Pre-requisites
 
 - Relatively recent version LTS of Node.js
 - Relatively recent version of Go installed and configured in your `PATH`
 
-### Build the plugin
+#### Build the plugin
 
 This plugin needs to be built from the source and signed so you could use it in your hosted Grafana instance. Follow the steps below to build and install the plugin:
 
@@ -49,7 +104,7 @@ This plugin needs to be built from the source and signed so you could use it in 
 
    Your `dist` directory should now contain the built frontend files.
 
-### Signing the plugin
+#### Signing the plugin
 
 The plugin needs to be signed before it can be used in a Grafana Cloud instance. The signing process ensures that the plugin is verified and trusted by Grafana.
 
@@ -66,7 +121,7 @@ The plugin needs to be signed before it can be used in a Grafana Cloud instance.
    npx @grafana/sign-plugin@latest --rootUrls http://localhost:3000/
    ```
 
-### Package the plugin
+#### Package the plugin
 
 The plugin needs to be packaged into a zip file before it can be installed in Grafana.
 
