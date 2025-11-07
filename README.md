@@ -1,6 +1,6 @@
 # Grafana Databricks Observability Plugin
 
-A Grafana plugin for monitoring and visualizing Databricks Jobs, DLTs and Pipelines directly in your Grafana dashboards.
+A Grafana plugin for monitoring and visualizing Databricks Jobs, Pipelines, Costs and general observability, directly in your Grafana dashboards.
 
 ![screenshot](src/img/screenshot.jpg)
 
@@ -9,6 +9,17 @@ A Grafana plugin for monitoring and visualizing Databricks Jobs, DLTs and Pipeli
 - Job Runs: Visualize your Databricks job executions, including run status, duration, and other metrics
 - Pipelines: Query data about your Databricks Delta Live Tables pipelines
 - Filtering Options: Flexible filtering by job ID, run type, and execution status
+
+### Currently Available
+
+- [x] Live and historical Job Status
+- [x] Live and historical Pipeline Status
+
+### Coming soon
+
+- [ ] Cost exploration (classic and serverless)
+
+## Getting Started (Quick)
 
 ## Installation
 
@@ -117,3 +128,19 @@ The query editor provides different options based on the selected resource type:
 ## Example Dashboards
 
 Please refer to the [dashboards](./dashboards) directory for example dashboards that demonstrate the capabilities of this plugin.
+
+The following Dashboard are available out of the box:
+
+### Job status monitoring
+
+[Dashboard link](dashboards/jobs_demo.json)
+
+This dashboard aggregates the job information from the workspace on the timeline view and gives an overview
+of the currently running jobs (with their status) and historical information.
+
+### Serverless cost monitoring
+
+[Dashboard link](dasbhoards/serverless_costs.json)
+
+This dashboard shows the serverless cost overview for a defined time period, with optional WoW or MoM views.
+You can also filter by type of serverless workloads, and attribute costs to specific resource.
